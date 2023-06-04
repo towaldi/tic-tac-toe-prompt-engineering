@@ -6,6 +6,7 @@
  * 1.1. All fields = null -> nothing in it.
  * 1.2. Fields can be filled with 'circle' or 'cross' (images)
  * 
+ * 2. Variable for the current player
  */
 
 let fields = [
@@ -20,6 +21,8 @@ let fields = [
     null        // 8
 ];
 
+
+let currentPlayer = 'circle';
 
 /* ==========================================================================
    Initialisation function
@@ -48,8 +51,8 @@ function init() {
  * 4. Next 'for' loop generates 3 fields (in each row)
  * 4.1. Const 'index' caluclates the index (e.g. in row 1 -> 1 * 3 + 0 = 4 -> field number 4)
  * 4.2. 'let symbols' is empty
- * 4.3. If/else statement - calculated index === 'circle' or 'cross' than 'o' or 'x'
- * 4.4. Inserted with the following 'tableHtml += `<td>${symbol}</td>`
+ * 4.3. If/else statement - calculated index === 'circle' or 'cross' than 'generateCircleSVG()' or 'x'
+ * 4.4. 'onclick' function to add circle or cross into the field -> inserted with the following 'tableHtml += `<td onclick="handleClick(this, ${index})">${symbol}</td>`
  */
 
 function render() {
@@ -62,11 +65,11 @@ function render() {
             const index = i * 3 + j;
             let symbol = '';
             if (fields[index] === 'circle') {
-                symbol = 'o'
+                symbol = generateCircleSVG();
             } else if (fields[index] === 'cross') {
-                symbol = 'x'
+                symbol = generateCrossSVG();
             }
-            tableHtml += `<td>${symbol}</td>`;
+            tableHtml += /*html*/ `<td onclick="handleClick(this, ${index})">${symbol}</td>`;
       }
       tableHtml += '</tr>';
     }
@@ -74,3 +77,61 @@ function render() {
 }
 
 
+/* ==========================================================================
+   Click
+   ========================================================================== */
+/**
+ * 1. 'handleClick' function has two parameters 'cell' and 'index'
+ * 1.1. Does the field/cell exist?
+ *
+ * 2. If statement -> if it's not filled -> fill it with current player ('circle' or 'cross')
+ * 2.1. 'onclick' get removed after click on the field
+ * 2.2. The current player chances -> if current player is 'circle' than 'cross' -> if else 'circle'
+ */
+
+function handleClick(cell, index) {
+    if (fields[index] === null) {
+        fields[index] = currentPlayer;
+        cell.innerHTML = currentPlayer === 'circle' ? generateCircleSVG() : generateCrossSVG();
+        cell.onclick = null;
+        currentPlayer = currentPlayer === 'circle' ? 'cross' : 'circle';
+    }
+}
+
+
+/* ==========================================================================
+   Generate forms -> svg
+   ========================================================================== */
+
+   function generateCircleSVG() {
+    const color = '#000';
+    const width = 40;
+    const height = 40;
+
+    return /*html*/     `<svg width="${width}" height="${height}">
+                            <circle cx="20" cy="20" r="18" stroke="${color}" stroke-width="5" fill="none">
+                                <animate attributeName="stroke-dasharray" from="0 188.5" to="188.5 0" dur="0.2s" fill="freeze" />
+                            </circle>
+                        </svg>`;
+}
+
+function generateCrossSVG() {
+    const color = '#000';
+    const width = 40;
+    const height = 40;
+
+    const svgHtml = /*html*/    `<svg width="${width}" height="${height}">
+                                    <line x1="0" y1="0" x2="${width}" y2="${height}"
+                                        stroke="${color}" stroke-width="4">
+                                        <animate attributeName="x2" values="0; ${width}" dur="0.2s" />
+                                        <animate attributeName="y2" values="0; ${height}" dur="0.2s" />
+                                    </line>
+                                    <line x1="${width}" y1="0" x2="0" y2="${height}"
+                                        stroke="${color}" stroke-width="5">
+                                        <animate attributeName="x2" values="${width}; 0" dur="0.2s" />
+                                        <animate attributeName="y2" values="0; ${height}" dur="0.2s" />
+                                    </line>
+                                </svg>`;
+    return svgHtml;
+}
+  
