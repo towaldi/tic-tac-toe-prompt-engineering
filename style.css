@@ -22,6 +22,11 @@
     gap: 48px;
 }
 
+.container {
+    /* Positioning */
+    position: relative;
+}
+
 /**
  * 1. Border-style hidden -> hidden value highest priority -> if any other conflictingborder is set, it won't be displayed
  * Tipps: https://css-tricks.com/table-with-borders-only-on-the-inside/
@@ -50,16 +55,36 @@ td:hover {
 }
 
 svg {
+    /* Display & box model */
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+.btn {
+    /* Display & box model */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 8px 16px;
+    /* Other */
+    background-color: rgba(0, 0, 0, 0.1);
+    border: 2px solid #000;
+    border-radius: 8px;
+    cursor: pointer;
+
+}
+
+.btn:hover {
+    /* Other */
+    background-color: rgba(0, 0, 0, 0.2);
 }
 
 
 /* ==========================================================================
    Font
    ========================================================================== */
-h1 {
+h1, .btn {
     font-family: 'Roboto';
     font-weight: 700;
     color: #000;

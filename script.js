@@ -24,6 +24,14 @@ let fields = [
 
 let currentPlayer = 'circle';
 
+
+const winningCombinations = [
+    [0, 1, 2], [3, 4, 5], [6, 7, 8], // horizontal
+    [0, 3, 6], [1, 4, 7], [2, 5, 8], // vertical
+    [0, 4, 8], [2, 4, 6], // diagonal
+];
+
+
 /* ==========================================================================
    Initialisation function
    ========================================================================== */
@@ -78,28 +86,6 @@ function render() {
 
 
 /* ==========================================================================
-   Click
-   ========================================================================== */
-/**
- * 1. 'handleClick' function has two parameters 'cell' and 'index'
- * 1.1. Does the field/cell exist?
- *
- * 2. If statement -> if it's not filled -> fill it with current player ('circle' or 'cross')
- * 2.1. 'onclick' get removed after click on the field
- * 2.2. The current player chances -> if current player is 'circle' than 'cross' -> if else 'circle'
- */
-
-function handleClick(cell, index) {
-    if (fields[index] === null) {
-        fields[index] = currentPlayer;
-        cell.innerHTML = currentPlayer === 'circle' ? generateCircleSVG() : generateCrossSVG();
-        cell.onclick = null;
-        currentPlayer = currentPlayer === 'circle' ? 'cross' : 'circle';
-    }
-}
-
-
-/* ==========================================================================
    Generate forms -> svg
    ========================================================================== */
 
@@ -134,4 +120,122 @@ function generateCrossSVG() {
                                 </svg>`;
     return svgHtml;
 }
-  
+
+
+/* ==========================================================================
+   Click
+   ========================================================================== */
+/**
+ * 1. 'handleClick' function has two parameters 'cell' and 'index'
+ * 1.1. Does the field/cell exist?
+ *
+ * 2. If statement -> if it's not filled -> fill it with current player ('circle' or 'cross')
+ * 2.1. 'onclick' get removed after click on the field
+ * 2.2. The current player chances -> if current player is 'circle' than 'cross' -> if else 'circle'
+ */
+
+function handleClick(cell, index) {
+    if (fields[index] === null) {
+        fields[index] = currentPlayer;
+        cell.innerHTML = currentPlayer === 'circle' ? generateCircleSVG() : generateCrossSVG();
+        cell.onclick = null;
+        currentPlayer = currentPlayer === 'circle' ? 'cross' : 'circle';
+
+        if (isGameFinished()) {
+            const winCombination = getWinningCombination();
+            drawWinningLine(winCombination);
+        }
+    }
+}
+
+
+/* ==========================================================================
+   Determine winner
+   ========================================================================== */
+/**
+ * 1. 'isGameFinished' checks if game is finished
+ * 1.1. '(field) => field !== null' -> checks if all fields within the array are filled
+ *      if no field has the value 'null' than it gets evaluated to 'true'
+ *      '.every() -> runs function for each field in the array
+ * 
+ * 1.2. If not all fields are filled the 'getWinningCombination()' is called -> to check if there is a 'winningCombinations'
+ *      If a combination is found (inside each field the same value) -> 'getWinningCombination()' gets back the id's of the 'winningCombinations' fields
+ *      If not -> returns 'null'
+ * 
+ * 1.3. The 'isGameFinished' gives back 'true' in both cases. Means that game is finished
+ */
+
+function isGameFinished() {
+    return fields.every((field) => field !== null) || getWinningCombination() !== null;
+}
+
+
+function getWinningCombination() {
+    for (let i = 0; i < winningCombinations.length; i++) {
+        const [a, b, c] = winningCombinations[i];
+        if (fields[a] === fields[b] && fields[b] === fields[c] && fields[a] !== null) {
+            return winningCombinations[i];
+        }
+    }
+    return null;
+}
+
+
+/* ==========================================================================
+   Draw line (winner)
+   ========================================================================== */
+/**
+ *
+ */
+
+function drawWinningLine(combination) {
+    const lineColor = '#000';
+    const lineWidth = 6;
+
+    const startCell = document.querySelectorAll(`td`)[combination[0]];
+    const endCell = document.querySelectorAll(`td`)[combination[2]];
+    const startRect = startCell.getBoundingClientRect();
+    const endRect = endCell.getBoundingClientRect();
+
+    const contentRect = document.getElementById('container').getBoundingClientRect();
+
+    const lineLength = Math.sqrt(
+        Math.pow(endRect.left - startRect.left, 2) + Math.pow(endRect.top - startRect.top, 2)
+    );
+    const lineAngle = Math.atan2(endRect.top - startRect.top, endRect.left - startRect.left);
+
+    const line = document.createElement('div');
+    line.style.position = 'absolute';
+    line.style.width = `${lineLength}px`;
+    line.style.height = `${lineWidth}px`;
+    line.style.backgroundColor = lineColor;
+    line.style.top = `${startRect.top + startRect.height / 2 - lineWidth / 2 - contentRect.top}px`;
+    line.style.left = `${startRect.left + startRect.width / 2 - contentRect.left}px`;
+    line.style.transform = `rotate(${lineAngle}rad)`;
+    line.style.transformOrigin = `top left`;
+    document.getElementById('container').appendChild(line);
+}
+
+
+/* ==========================================================================
+   Restart game
+   ========================================================================== */
+/**
+ * 1. Reset the 'fields' array
+ * 2. Calling 'render()' function
+ */
+
+function restartGame() {
+    fields = [
+        null,       // 0
+        null,       // 1 
+        null,       // 2      
+        null,       // 3
+        null,       // 4
+        null,       // 5
+        null,       // 6
+        null,       // 7
+        null        // 8
+    ];
+    render();
+}
